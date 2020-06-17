@@ -1,5 +1,5 @@
 {
-  "name": "DS1307RTC",
+  "name": "MT_DS1307RTC",
   "keywords": "i2c, rtc, time, clock",
   "description": "DS1307 RTC (Real-Time-Clock)",
   "repository":

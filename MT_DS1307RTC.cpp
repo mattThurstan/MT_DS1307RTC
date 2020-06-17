@@ -1,5 +1,5 @@
 /*
- * DS1307RTC.h - library for DS1307 RTC
+ * MT_DS1307RTC.h - library for DS1307 RTC
   
   Copyright (c) Michael Margolis 2009
   This library is intended to be uses with Arduino Time library functions
@@ -20,6 +20,8 @@
   
   30 Dec 2009 - Initial release
   5 Sep 2011 updated for Arduino 1.0
+  
+  Edited by Thurstan to add temperature.
  */
 
 
@@ -29,24 +31,24 @@
 #else
 #include <Wire.h>
 #endif
-#include "DS1307RTC.h"
+#include "MT_DS1307RTC.h"
 
 #define DS1307_CTRL_ID 0x68 
 
-DS1307RTC::DS1307RTC()
+MT_DS1307RTC::MT_DS1307RTC()
 {
   Wire.begin();
 }
   
 // PUBLIC FUNCTIONS
-time_t DS1307RTC::get()   // Aquire data from buffer and convert to time_t
+time_t MT_DS1307RTC::get()   // Aquire data from buffer and convert to time_t
 {
   tmElements_t tm;
   if (read(tm) == false) return 0;
   return(makeTime(tm));
 }
 
-bool DS1307RTC::set(time_t t)
+bool MT_DS1307RTC::set(time_t t)
 {
   tmElements_t tm;
   breakTime(t, tm);
@@ -54,7 +56,7 @@ bool DS1307RTC::set(time_t t)
 }
 
 // Aquire data from the RTC chip in BCD format
-bool DS1307RTC::read(tmElements_t &tm)
+bool MT_DS1307RTC::read(tmElements_t &tm)
 {
   uint8_t sec;
   Wire.beginTransmission(DS1307_CTRL_ID);
@@ -95,7 +97,7 @@ bool DS1307RTC::read(tmElements_t &tm)
   return true;
 }
 
-bool DS1307RTC::write(tmElements_t &tm)
+bool MT_DS1307RTC::write(tmElements_t &tm)
 {
   // To eliminate any potential race conditions,
   // stop the clock before writing the values,
@@ -143,7 +145,7 @@ bool DS1307RTC::write(tmElements_t &tm)
   return true;
 }
 
-unsigned char DS1307RTC::isRunning()
+unsigned char MT_DS1307RTC::isRunning()
 {
   Wire.beginTransmission(DS1307_CTRL_ID);
 #if ARDUINO >= 100  
@@ -162,7 +164,7 @@ unsigned char DS1307RTC::isRunning()
 #endif  
 }
 
-void DS1307RTC::setCalibration(char calValue)
+void MT_DS1307RTC::setCalibration(char calValue)
 {
   unsigned char calReg = abs(calValue) & 0x1f;
   if (calValue >= 0) calReg |= 0x20; // S bit is positive to speed up the clock
@@ -177,7 +179,7 @@ void DS1307RTC::setCalibration(char calValue)
   Wire.endTransmission();  
 }
 
-char DS1307RTC::getCalibration()
+char MT_DS1307RTC::getCalibration()
 {
   Wire.beginTransmission(DS1307_CTRL_ID);
 #if ARDUINO >= 100  
@@ -198,21 +200,44 @@ char DS1307RTC::getCalibration()
   return out;
 }
 
+int16_t MT_DS1307RTC::getTemperatureBasic()
+{
+  int16_t tempMSB;
+  
+// Get temperature MSB - 0x11
+  Wire.beginTransmission(DS1307_CTRL_ID);
+#if ARDUINO >= 100  
+  Wire.write((uint8_t)0x11); 
+#else
+  Wire.send(0x11);
+#endif
+
+  Wire.requestFrom(DS1307_CTRL_ID, 1);
+#if ARDUINO >= 100
+  tempMSB = Wire.read();
+#else
+  tempMSB = Wire.receive();
+#endif
+
+  return tempMSB;
+}
+
+
 // PRIVATE FUNCTIONS
 
 // Convert Decimal to Binary Coded Decimal (BCD)
-uint8_t DS1307RTC::dec2bcd(uint8_t num)
+uint8_t MT_DS1307RTC::dec2bcd(uint8_t num)
 {
   return ((num/10 * 16) + (num % 10));
 }
 
 // Convert Binary Coded Decimal (BCD) to Decimal
-uint8_t DS1307RTC::bcd2dec(uint8_t num)
+uint8_t MT_DS1307RTC::bcd2dec(uint8_t num)
 {
   return ((num/16 * 10) + (num % 16));
 }
 
-bool DS1307RTC::exists = false;
+bool MT_DS1307RTC::exists = false;
 
-DS1307RTC RTC = DS1307RTC(); // create an instance for the user
+MT_DS1307RTC RTC = MT_DS1307RTC(); // create an instance for the user
 

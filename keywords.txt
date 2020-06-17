@@ -14,6 +14,7 @@ set	KEYWORD2
 read	KEYWORD2
 write	KEYWORD2
 chipPresent	KEYWORD2
+getTemperatureBasic	KEYWORD2
 #######################################
 # Instances (KEYWORD2)
 #######################################
