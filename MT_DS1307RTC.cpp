@@ -203,6 +203,7 @@ char MT_DS1307RTC::getCalibration()
 int16_t MT_DS1307RTC::getTemperatureBasic()
 {
   int16_t tempMSB;
+  // uint8_t = byte
   
 // Get temperature MSB - 0x11
   Wire.beginTransmission(DS1307_CTRL_ID);
